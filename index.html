@@ -1473,6 +1473,22 @@
       }
       .founder-body .btn { align-self: flex-start; margin-top: 8px; }
       .founder-side { display: flex; flex-direction: column; gap: 14px; }
+      .founder-side-photo {
+        width: 100%;
+        aspect-ratio: 4/3;
+        border-radius: var(--radius-card);
+        overflow: hidden;
+        border: 1px solid var(--rule-soft);
+        background: var(--paper-2);
+      }
+      .founder-side-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 700ms var(--ease-out);
+      }
+      .founder-side-photo:hover img { transform: scale(1.04); }
       .founder-side-card {
         padding: 18px 20px;
         border: 1px solid var(--rule-soft);
@@ -1513,7 +1529,8 @@
       .link-arrow:hover { color: var(--focus); }
       @media (max-width: 900px) {
         .founder-grid { grid-template-columns: 1fr; }
-        .founder-side { flex-direction: row; }
+        .founder-side { flex-direction: row; flex-wrap: wrap; }
+        .founder-side-photo { flex: 1 1 100%; }
       }
       @media (max-width: 600px) {
         .founder-side { flex-direction: column; }
@@ -2218,6 +2235,9 @@
             </div>
           </article>
           <aside class="founder-side">
+            <div class="founder-side-photo" data-reveal="right">
+              <img src="assets/discovery-bg.jpg" alt="Group coaching session" loading="lazy" />
+            </div>
             <article class="founder-side-card">
               <span class="mono mono-mute">About Atom</span>
               <h4>Help first, ask later. Always.</h4>
