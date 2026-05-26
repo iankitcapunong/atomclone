@@ -1828,14 +1828,6 @@
         translate: 0 0;
       }
 
-      @media (prefers-reduced-motion: reduce) {
-        [data-reveal] {
-          opacity: 1 !important;
-          translate: 0 0 !important;
-          transition: none !important;
-        }
-      }
-
       /* ═════════════ Mobile polish ═════════════ */
 
       /* Prevent the calendar's corner brackets / decorative shadows
@@ -2456,8 +2448,9 @@
       })();
 
       // Scroll-reveal — slide in / slide out, bi-directional.
+      // Note: intentionally ignores prefers-reduced-motion so animations
+      // always play for clients/viewers regardless of OS accessibility setting.
       (function () {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         if (!('IntersectionObserver' in window)) return;
 
         var groups = [
