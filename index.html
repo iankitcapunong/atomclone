@@ -1798,69 +1798,6 @@
       /* Footer accent on statement em */
       .ft .statement em { font-style: normal; color: var(--accent); }
 
-      /* ═════════════ Scroll-reveal animations ═════════════
-         Each element knows whether it sits ABOVE or BELOW the viewport.
-         As it enters, it slides into place from that side. As it leaves,
-         it slides off in the same direction — so the user sees a full
-         slide-in / slide-out on both scroll directions. Uses individual
-         `translate` / `scale` (not `transform`) so card hover lift stacks
-         independently. */
-      [data-reveal] {
-        opacity: 0;
-        translate: 0 96px; /* default = "below" position */
-        scale: 0.96;
-        filter: blur(8px);
-        transition:
-          opacity   1100ms var(--ease-out),
-          translate 1200ms var(--ease-out),
-          scale     1200ms var(--ease-out),
-          filter     900ms var(--ease-out);
-        transition-delay: var(--reveal-delay, 0ms);
-        will-change: opacity, translate, scale, filter;
-      }
-
-      /* Vertical (default) — slide from above or below */
-      [data-reveal].is-below { opacity: 0; translate: 0  96px; scale: 0.96; filter: blur(8px); }
-      [data-reveal].is-above { opacity: 0; translate: 0 -96px; scale: 0.96; filter: blur(8px); }
-
-      /* Left slide-in / slide-out: drifts further left when leaving */
-      [data-reveal="left"]          { opacity: 0; translate: -110px 0;    scale: 0.96; filter: blur(8px); }
-      [data-reveal="left"].is-below { opacity: 0; translate: -80px  56px; scale: 0.96; filter: blur(8px); }
-      [data-reveal="left"].is-above { opacity: 0; translate: -80px -56px; scale: 0.96; filter: blur(8px); }
-
-      /* Right slide-in / slide-out */
-      [data-reveal="right"]          { opacity: 0; translate: 110px 0;    scale: 0.96; filter: blur(8px); }
-      [data-reveal="right"].is-below { opacity: 0; translate: 80px  56px; scale: 0.96; filter: blur(8px); }
-      [data-reveal="right"].is-above { opacity: 0; translate: 80px -56px; scale: 0.96; filter: blur(8px); }
-
-      /* Scale variant — grows in, shrinks out */
-      [data-reveal="scale"]          { opacity: 0; translate: 0 0;    scale: 0.82; filter: blur(10px); }
-      [data-reveal="scale"].is-below { opacity: 0; translate: 0  64px; scale: 0.82; filter: blur(10px); }
-      [data-reveal="scale"].is-above { opacity: 0; translate: 0 -64px; scale: 0.82; filter: blur(10px); }
-
-      /* Pure fade (no slide) */
-      [data-reveal="fade"],
-      [data-reveal="fade"].is-below,
-      [data-reveal="fade"].is-above { opacity: 0; translate: 0 0; scale: 1; filter: blur(6px); }
-
-      /* Visible / in-place state */
-      [data-reveal].is-visible {
-        opacity: 1;
-        translate: 0 0;
-        scale: 1;
-        filter: blur(0);
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        [data-reveal] {
-          opacity: 1 !important;
-          translate: 0 0 !important;
-          scale: 1 !important;
-          filter: none !important;
-          transition: none !important;
-        }
-      }
-
       /* ═════════════ Mobile polish ═════════════ */
 
       /* Prevent the calendar's corner brackets / decorative shadows
@@ -2235,7 +2172,7 @@
             </div>
           </article>
           <aside class="founder-side">
-            <div class="founder-side-photo" data-reveal="right">
+            <div class="founder-side-photo">
               <img src="assets/about-atom.jpg" alt="Group coaching session in the morning" loading="lazy" />
             </div>
             <article class="founder-side-card">
@@ -2477,119 +2414,6 @@
           btn.disabled = true;
           success.hidden = false;
           success.textContent = 'Got it. The checklist will land in ' + v + ' within an hour. Check your inbox (and the promotions tab).';
-        });
-      })();
-
-      // Scroll-reveal — fades + lifts content into view in both directions.
-      // Stagger is computed PER PARENT so each section's items cascade
-      // independently instead of stretching across the whole document.
-      (function () {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        if (!('IntersectionObserver' in window)) return;
-
-        var groups = [
-          // Hero
-          { sel: '.hero > .container > *',                       stagger: 0   },
-          { sel: '.hero .trust-cell',                            stagger: 0   },
-
-          // Universal section heads (kicker → h2 → sub cascade)
-          { sel: '.section-head > *',                            stagger: 0   },
-          { sel: '.founder-head > *',                            stagger: 0   },
-
-          // The Shift / Funnel / Proof / Features
-          { sel: '.problem-card',                                stagger: 110 },
-          { sel: '.problem-card > *',                            stagger: 0   },
-          { sel: '.step',                                        stagger: 130 },
-          { sel: '.step > *',                                    stagger: 0   },
-          { sel: '.testimonial',                                 stagger: 110 },
-          { sel: '.testimonial > *',                             stagger: 0   },
-          { sel: '.feature',                                     stagger: 80  },
-
-          // Promise
-          { sel: '.promise-card',  variant: 'scale',             stagger: 0   },
-          { sel: '.promise-header > *',                          stagger: 0   },
-          { sel: '.promise-row',   variant: 'left',              stagger: 90  },
-
-          // Founder
-          { sel: '.founder-photo', variant: 'left',              stagger: 0   },
-          { sel: '.founder-body > *',                            stagger: 0   },
-          { sel: '.founder-side-card', variant: 'right',         stagger: 130 },
-          { sel: '.founder-side-card > *',                       stagger: 0   },
-
-          // Soft CTA
-          { sel: '.soft-inner > div > *',                        stagger: 0   },
-          { sel: '.soft-inner > form', variant: 'right',         stagger: 0   },
-          { sel: '.soft-inner > form > *',                       stagger: 0   },
-
-          // FAQ
-          { sel: '.faq-list details',                            stagger: 70  },
-
-          // Booking
-          { sel: '.booking-main',     variant: 'scale',          stagger: 0   },
-          { sel: '.booking-status > *',                          stagger: 0   },
-          { sel: '.booking-aside > *', variant: 'right',         stagger: 130 },
-          { sel: '.booking-card > h3, .booking-card > ul',       stagger: 0   },
-          { sel: '.booking-card li',  variant: 'left',           stagger: 0   },
-
-          // Footer
-          { sel: 'footer.ft .statement',                         stagger: 0   },
-          { sel: 'footer.ft .ft-meta > *',                       stagger: 0   },
-          { sel: 'footer.ft .ft-meta-links a',                   stagger: 0   },
-        ];
-
-        groups.forEach(function (g) {
-          var nodes = document.querySelectorAll(g.sel);
-          // Bucket by parent so each parent's children get their own
-          // 0,1,2… index — every section staggers from zero.
-          var byParent = new Map();
-          nodes.forEach(function (el) {
-            var key = el.parentElement;
-            if (!byParent.has(key)) byParent.set(key, []);
-            byParent.get(key).push(el);
-          });
-          byParent.forEach(function (siblings) {
-            siblings.forEach(function (el, i) {
-              if (!el.hasAttribute('data-reveal')) {
-                el.setAttribute('data-reveal', g.variant || '');
-              }
-              if (g.stagger) {
-                el.style.setProperty('--reveal-delay', (i * g.stagger) + 'ms');
-              }
-            });
-          });
-        });
-
-        var io = new IntersectionObserver(function (entries) {
-          var vh = window.innerHeight || document.documentElement.clientHeight;
-          entries.forEach(function (entry) {
-            var el = entry.target;
-            if (entry.isIntersecting) {
-              el.classList.add('is-visible');
-              el.classList.remove('is-above', 'is-below');
-            } else {
-              el.classList.remove('is-visible');
-              // Use element's center vs viewport midline to decide which
-              // side of the viewport it's on — drives the slide-out direction.
-              var r = entry.boundingClientRect;
-              var center = r.top + r.height / 2;
-              if (center < vh / 2) {
-                el.classList.add('is-above');
-                el.classList.remove('is-below');
-              } else {
-                el.classList.add('is-below');
-                el.classList.remove('is-above');
-              }
-            }
-          });
-        }, {
-          // Shrink the trigger zone so elements un-reveal while still
-          // partially visible — that way you can see the slide-out animate.
-          rootMargin: '-12% 0px -12% 0px',
-          threshold: 0
-        });
-
-        document.querySelectorAll('[data-reveal]').forEach(function (el) {
-          io.observe(el);
         });
       })();
 
