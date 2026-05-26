@@ -1798,6 +1798,44 @@
       /* Footer accent on statement em */
       .ft .statement em { font-style: normal; color: var(--accent); }
 
+      /* ═════════════ Scroll-reveal: slide in / slide out ═════════════
+         Elements slide in from below as they enter the viewport, and
+         slide out upward as they leave (and vice-versa on scroll up).
+         Uses `translate`/`opacity` only — no blur, no scale — for a
+         clean directional motion. */
+      [data-reveal] {
+        opacity: 0;
+        translate: 0 64px;
+        transition:
+          opacity   700ms var(--ease-out),
+          translate 800ms var(--ease-out);
+        transition-delay: var(--reveal-delay, 0ms);
+        will-change: opacity, translate;
+      }
+      [data-reveal].is-below { opacity: 0; translate: 0  64px; }
+      [data-reveal].is-above { opacity: 0; translate: 0 -64px; }
+
+      [data-reveal="left"]          { opacity: 0; translate: -72px 0;   }
+      [data-reveal="left"].is-below { opacity: 0; translate: -56px 36px; }
+      [data-reveal="left"].is-above { opacity: 0; translate: -56px -36px; }
+
+      [data-reveal="right"]          { opacity: 0; translate: 72px 0;   }
+      [data-reveal="right"].is-below { opacity: 0; translate: 56px 36px; }
+      [data-reveal="right"].is-above { opacity: 0; translate: 56px -36px; }
+
+      [data-reveal].is-visible {
+        opacity: 1;
+        translate: 0 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        [data-reveal] {
+          opacity: 1 !important;
+          translate: 0 0 !important;
+          transition: none !important;
+        }
+      }
+
       /* ═════════════ Mobile polish ═════════════ */
 
       /* Prevent the calendar's corner brackets / decorative shadows
@@ -2414,6 +2452,104 @@
           btn.disabled = true;
           success.hidden = false;
           success.textContent = 'Got it. The checklist will land in ' + v + ' within an hour. Check your inbox (and the promotions tab).';
+        });
+      })();
+
+      // Scroll-reveal — slide in / slide out, bi-directional.
+      (function () {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (!('IntersectionObserver' in window)) return;
+
+        var groups = [
+          // Hero + section heads
+          { sel: '.hero > .container > *'                                       },
+          { sel: '.hero .trust-cell'                                            },
+          { sel: '.section-head > *'                                            },
+          { sel: '.founder-head > *'                                            },
+
+          // Cards cascade between siblings
+          { sel: '.problem-card',                                stagger: 110   },
+          { sel: '.step',                                        stagger: 130   },
+          { sel: '.testimonial',                                 stagger: 110   },
+          { sel: '.feature',                                     stagger: 80    },
+
+          // Promise
+          { sel: '.promise-card'                                                },
+          { sel: '.promise-row',     variant: 'left',            stagger: 90    },
+
+          // Founder
+          { sel: '.founder-photo',   variant: 'left'                            },
+          { sel: '.founder-body > *'                                            },
+          { sel: '.founder-side-photo', variant: 'right'                        },
+          { sel: '.founder-side-card',  variant: 'right',        stagger: 130   },
+
+          // Soft CTA
+          { sel: '.soft-inner > div > *'                                        },
+          { sel: '.soft-inner > form',  variant: 'right'                        },
+
+          // FAQ
+          { sel: '.faq-list details',                            stagger: 70    },
+
+          // Booking
+          { sel: '.booking-main'                                                },
+          { sel: '.booking-status > *'                                          },
+          { sel: '.booking-aside > *',  variant: 'right',        stagger: 130   },
+          { sel: '.booking-card li',    variant: 'left'                         },
+
+          // Footer
+          { sel: 'footer.ft .statement'                                         },
+          { sel: 'footer.ft .ft-meta > *'                                       },
+        ];
+
+        groups.forEach(function (g) {
+          var nodes = document.querySelectorAll(g.sel);
+          var byParent = new Map();
+          nodes.forEach(function (el) {
+            var key = el.parentElement;
+            if (!byParent.has(key)) byParent.set(key, []);
+            byParent.get(key).push(el);
+          });
+          byParent.forEach(function (siblings) {
+            siblings.forEach(function (el, i) {
+              if (!el.hasAttribute('data-reveal')) {
+                el.setAttribute('data-reveal', g.variant || '');
+              }
+              if (g.stagger) {
+                el.style.setProperty('--reveal-delay', (i * g.stagger) + 'ms');
+              }
+            });
+          });
+        });
+
+        var io = new IntersectionObserver(function (entries) {
+          var vh = window.innerHeight || document.documentElement.clientHeight;
+          entries.forEach(function (entry) {
+            var el = entry.target;
+            if (entry.isIntersecting) {
+              el.classList.add('is-visible');
+              el.classList.remove('is-above', 'is-below');
+            } else {
+              el.classList.remove('is-visible');
+              // Element's center vs viewport midline → which side it left from.
+              var r = entry.boundingClientRect;
+              var center = r.top + r.height / 2;
+              if (center < vh / 2) {
+                el.classList.add('is-above');
+                el.classList.remove('is-below');
+              } else {
+                el.classList.add('is-below');
+                el.classList.remove('is-above');
+              }
+            }
+          });
+        }, {
+          // Shrink the trigger zone so slide-out fires while still partially visible.
+          rootMargin: '-12% 0px -12% 0px',
+          threshold: 0
+        });
+
+        document.querySelectorAll('[data-reveal]').forEach(function (el) {
+          io.observe(el);
         });
       })();
 
